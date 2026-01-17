@@ -45,20 +45,28 @@ class SearchOrchestrator:
         """
         logger.info("Starting sketch-to-image search for query: '%s'", text_query)
 
-        # Step 1: Encode the sketch (with caching)
+        # Step 1: Physical Sketch Processing
+        # In 2026, we don't 'guess' words. we use the sketch bits themselves.
         query_embedding = await self.embedder.encode_sketch(sketch)
-        logger.info("Sketch encoded to %d-dim embedding", len(query_embedding))
+        logger.info("Sketch converted to %d-dim neural embedding", len(query_embedding))
 
-        # Step 2: Semantic Auto-Context (Magic Search)
-        effective_query = text_query
+        # Step 2: Direct Visual Recall (DVR)
+        # We project the sketch into the semantic space to find web candidates.
         if not text_query or text_query.strip() == "":
+            # Semantic Interrogation: What is this drawing?
+            # Returns a descriptive tag like "modern chair minimalist furniture"
             effective_query = self.embedder.classify_sketch(query_embedding)
-            logger.info("No manual context provided. Sketch interpreted as: '%s'", effective_query)
-
-        # Step 3: Recall - Fetch candidates from DuckDuckGo
-        search_results = await self.search_adapter.search(
-            effective_query, max_results=max_results * 2
-        )
+            logger.info("Zero-Shot Visual Intent: '%s'", effective_query)
+            
+            search_results = await self.search_adapter.search(
+                effective_query, 
+                max_results=max_results * 5 
+            )
+        else:
+            # Hybrid search for better results when context is provided
+            search_results = await self.search_adapter.search(
+                text_query, max_results=max_results * 5
+            )
 
         if not search_results:
             raise HTTPException(status_code=404, detail="No results found from search engine")
