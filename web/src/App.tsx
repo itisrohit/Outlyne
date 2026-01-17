@@ -138,7 +138,12 @@ function App() {
               </h2>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-2 -mx-2 pb-12 scrollbar-zen">
+            <div
+              className={cn(
+                "flex-1 px-2 -mx-2 pb-12 scrollbar-zen",
+                results.length > 0 ? "overflow-y-auto" : "overflow-hidden",
+              )}
+            >
               <ResultGrid results={results} isLoading={isLoading && results.length === 0} />
 
               {!hasSearched && (
