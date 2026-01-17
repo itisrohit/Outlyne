@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand: oklch(0.7 0.2 250);
+  --font-sans: "Inter", system-ui, sans-serif;
+}
+
+:root {
+  font-family: var(--font-sans);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+/* Premium Glassmorphism Utility */
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-dark {
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
