@@ -4,37 +4,39 @@
 # ---------------------------------------------------------
 FROM python:3.12-slim AS exporter
 
-WORKDIR /app
+# Use official uv binary for speed and silence
+COPY --from=ghcr.io/astral-sh/uv:0.5.21 /uv /uvx /bin/
 
-# Install uv
-RUN pip install uv
+WORKDIR /app
 
 # Copy dependency files
 COPY pyproject.toml uv.lock ./
 
-# Install dependencies using a cache mount for uv
+# Install dependencies - silenced and no-progress to keep logs clean
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen
+    uv sync --frozen --no-cache --no-progress --quiet
 
 # Copy only files needed for model export
 COPY src/embedder.py src/logger.py src/__init__.py ./src/
 
 # Export the model to OpenVINO IR
-# We use a cache mount for BOTH HuggingFace and the local OV cache.
-# This makes subsequent builds near-instant.
+# Aggressively silence all library noise to ensure a "Green" status
 RUN --mount=type=cache,target=/app/.cache/huggingface \
     --mount=type=cache,target=/app/.cache/ov_model_cache \
     mkdir -p .cache/ov_model && \
-    HF_HOME=/app/.cache/huggingface \
-    PYTHONPATH=/app/src \
-    TRANSFORMERS_VERBOSITY=error \
-    HF_HUB_DISABLE_SYMLINKS_WARNING=1 \
-    PYTHONWARNINGS="ignore" \
-    uv run python -c "\
-import asyncio; \
+    ( \
+      HF_HOME=/app/.cache/huggingface \
+      PYTHONPATH=/app/src \
+      TRANSFORMERS_VERBOSITY=error \
+      HF_HUB_DISABLE_SYMLINKS_WARNING=1 \
+      PYTHONWARNINGS="ignore" \
+      uv run --quiet python -c "\
+import asyncio, warnings; \
+warnings.filterwarnings('ignore'); \
 from embedder import VisualEmbedder; \
 embedder = VisualEmbedder(model_path='.cache/ov_model'); \
-asyncio.run(embedder.encode_sketch(__import__('numpy').ones((224,224,3), dtype='uint8')))" 2>&1
+asyncio.run(embedder.encode_sketch(__import__('numpy').ones((224,224,3), dtype='uint8')))" \
+    ) > /dev/stdout 2>&1
 
 # ---------------------------------------------------------
 # STAGE 2: Runtime (Standard)
