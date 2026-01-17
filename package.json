@@ -1,0 +1,22 @@
+{
+  "name": "outlyne",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev:api": "uv run uvicorn src.outlyne:app --reload",
+    "dev:web": "echo 'Vite setup pending in ./web...'",
+    "lint": "uv run ruff check . && uv run mypy .",
+    "format": "uv run ruff format .",
+    "test": "uv run pytest",
+    "sync": "uv sync",
+    "lock": "uv lock",
+    "clean": "rm -rf .venv node_modules .next out build dist .pytest_cache .ruff_cache .mypy_cache"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
