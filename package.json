@@ -4,6 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "dev": "bun run dev:api & bun run dev:web",
     "dev:api": "HF_HOME=.cache/huggingface TRANSFORMERS_VERBOSITY=error HF_HUB_DISABLE_SYMLINKS_WARNING=1 PYTHONPATH=src uv run uvicorn main:app --reload",
     "dev:web": "cd web && bun run dev",
     "lint": "HF_HOME=.cache/huggingface TRANSFORMERS_VERBOSITY=error uv run ruff check . && uv run mypy . && bun run lint:web",
