@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-The Vision Core is Outlyne's foundational component—a CPU-optimized visual embedding engine that converts sketches and images into 768-dimensional semantic vectors. Built on Google's SigLIP2 architecture and accelerated with Intel OpenVINO, it achieves 92.7ms inference latency on consumer hardware while maintaining production-grade accuracy.
+The Vision Core is Outlyne's foundational component—a CPU-optimized visual embedding engine that converts sketches and images into 768-dimensional semantic vectors. Built on Google's SigLIP2 architecture and accelerated with Intel OpenVINO, it achieves 92.7ms inference latency on consumer hardware while maintaining high accuracy.
 
 **Key Metrics:**
 - Inference latency: 92.7ms (Apple M1)
@@ -186,7 +186,7 @@ COPY src/ ./src/
 RUN uv run python -c "from embedder import VisualEmbedder; VisualEmbedder()"
 # ↑ This exports and saves the OpenVINO IR files
 
-# Stage 2: Runtime (Production)
+# Stage 2: Runtime (Standard)
 FROM python:3.12-slim
 COPY --from=exporter /app/.cache/ov_model /app/.cache/ov_model
 COPY src/ ./src/
@@ -333,7 +333,7 @@ curl http://localhost:8000/
 **Pro Tip:** Use local development for rapid iteration. Use Docker for:
 - Final integration testing
 - Deployment verification
-- Performance profiling (production-like environment)
+- Performance profiling (optimized environment)
 
 ---
 
@@ -367,7 +367,7 @@ curl http://localhost:8000/
 
 ## Conclusion
 
-The Vision Core successfully demonstrates that production-grade visual embedding is achievable on consumer CPUs without GPU acceleration. Through careful optimization (OpenVINO, multi-stage Docker builds, L2 normalization), the system achieves:
+The Vision Core successfully demonstrates that high-quality visual embedding is achievable on consumer CPUs without GPU acceleration. Through careful optimization (OpenVINO, multi-stage Docker builds, L2 normalization), the system achieves:
 
 - **Performance:** 92.7ms inference latency (8% faster than target)
 - **Efficiency:** 813MB memory footprint (single model instance)

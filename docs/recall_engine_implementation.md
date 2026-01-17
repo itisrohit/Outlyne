@@ -22,9 +22,7 @@ Visual search systems traditionally require maintaining a local index of image e
 2. **Update Frequency:** The web changes constantly; maintaining freshness is expensive
 3. **Infrastructure Costs:** Indexing and serving require significant computational resources
 
-### Design Constraint
-
-Build a production-grade sketch-to-image search engine that:
+Build a high-quality sketch-to-image search engine that:
 - Operates without a local image index
 - Uses only free, publicly available APIs
 - Maintains sub-5-second perceived latency
@@ -297,7 +295,7 @@ Similarity: 0.6131
 
 ### 1. Free Infrastructure Viability
 
-**Finding:** DuckDuckGo's unlimited API access demonstrates that production-grade search is achievable without commercial APIs.
+**Finding:** DuckDuckGo's unlimited API access demonstrates that high-quality search is achievable without commercial APIs.
 
 **Implication:** Cost constraints need not compromise functionality for MVP-stage products.
 
@@ -326,9 +324,9 @@ Similarity: 0.6131
 ### Short-Term (Phase 4)
 
 1. **Caching Layer:**
-   - Redis for query → results mapping
-   - Content-addressable storage for embeddings
-   - Target: 80% cache hit rate
+   - In-memory `OrderedDict` for sketch → embedding mapping
+   - BLAKE3 hashes for fast, unique cache keys
+   - Target: 90% repeat sketch hit rate
 
 2. **Batch Size Tuning:**
    - Dynamic adjustment based on load
@@ -349,8 +347,6 @@ Similarity: 0.6131
    - Quantization (FP32 → INT8)
 
 ---
-
-## Conclusion
 
 The Recall Engine and Precision Layer successfully demonstrate that high-quality visual search is achievable without maintaining a local image index. By leveraging free meta-search APIs and optimized similarity ranking, the system achieves:
 

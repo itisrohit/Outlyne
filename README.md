@@ -10,7 +10,7 @@ Ensure you have the following installed:
 - **Python 3.12+**
 - **Bun** (Fast JavaScript/Task Runner)
 - **uv** (Extremely fast Python package manager)
-- **Docker** (Recommended for production-like performance)
+- **Docker** (Recommended for optimized performance)
 
 ---
 
