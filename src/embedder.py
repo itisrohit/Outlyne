@@ -26,7 +26,7 @@ class VisualEmbedder:
         model_path: str | None = None,
     ):
         self.device = device
-        
+
         # Determine if we have a pre-baked model path (e.g., in Docker)
         # Or check if the local export directory already exists to skip export
         effective_path = model_path or os.path.join(".cache", "ov_model")
@@ -34,13 +34,13 @@ class VisualEmbedder:
 
         if has_local_ir:
             logger.info("🚀 Loading pre-baked OpenVINO model from %s", effective_path)
-            self.processor = AutoProcessor.from_pretrained(effective_path) # type: ignore[no-untyped-call]
+            self.processor = AutoProcessor.from_pretrained(effective_path)  # type: ignore[no-untyped-call]
             self.model = OVModelForFeatureExtraction.from_pretrained(
                 effective_path, device=device, export=False
             )
         else:
             logger.info("📦 Exporting visual model to IR (this happens once)...")
-            self.processor = AutoProcessor.from_pretrained(model_id, use_fast=True) # type: ignore[no-untyped-call]
+            self.processor = AutoProcessor.from_pretrained(model_id, use_fast=True)  # type: ignore[no-untyped-call]
             self.model = OVModelForFeatureExtraction.from_pretrained(
                 model_id, export=True, device=device
             )
@@ -79,11 +79,7 @@ class VisualEmbedder:
         Generates a normalized visual embedding for a PIL Image.
         """
         inputs = self.processor(
-            text=[" "], 
-            images=image, 
-            padding="max_length", 
-            max_length=1, 
-            return_tensors="pt"
+            text=[" "], images=image, padding="max_length", max_length=1, return_tensors="pt"
         )
 
         with torch.no_grad():
@@ -119,15 +115,17 @@ class VisualEmbedder:
 
 if __name__ == "__main__":
     from logger import setup_logging
+
     setup_logging()
-    
+
     embedder = VisualEmbedder()
     dummy_sketch = np.ones((224, 224, 3), dtype=np.uint8) * 255
     cv2.line(dummy_sketch, (50, 50), (150, 150), (0, 0, 0), 2)
 
     import time
+
     start = time.time()
     vec = embedder.encode_sketch(dummy_sketch)
-    
+
     logger.info("Embedding shape: %s", vec.shape)
     logger.info("Inference time: %.2fms", (time.time() - start) * 1000)

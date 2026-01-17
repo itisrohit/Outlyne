@@ -1,14 +1,18 @@
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from typing import Any
+
 from fastapi import FastAPI
+
 from embedder import VisualEmbedder
-from logger import setup_logging, get_logger
+from logger import get_logger, setup_logging
 
 setup_logging()
 logger = get_logger(__name__)
 
+
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Load the ML model
     logger.info("Starting up: Loading Vision Core...")
     # This will use the pre-baked model if running in Docker
@@ -18,6 +22,7 @@ async def lifespan(app: FastAPI):
     # Clean up
     logger.info("Shutting down...")
 
+
 app = FastAPI(title="Outlyne API", lifespan=lifespan)
 
 
@@ -25,7 +30,7 @@ app = FastAPI(title="Outlyne API", lifespan=lifespan)
 async def root() -> dict[str, Any]:
     return {
         "message": "Outlyne API is running",
-        "vision_core": "loaded" if hasattr(app.state, "embedder") else "not_loaded"
+        "vision_core": "loaded" if hasattr(app.state, "embedder") else "not_loaded",
     }
 
 
