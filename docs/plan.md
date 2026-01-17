@@ -102,7 +102,8 @@ graph TD
 ### Phase 1: The Vision Core [COMPLETED]
 - [x] Integrate SigLIP2 and optimize with OpenVINO.
 - [x] Implement `normalize_sketch()` for line-width and contrast stabilization.
-- [x] **Deliverable:** VisualEmbedder module passing bench tests.
+- [x] Containerize with Docker and OpenVINO "bakery" for 2s cold starts.
+- [x] **Deliverable:** VisualEmbedder module passing bench tests + Dockerized API.
 
 ### Phase 2: The Recall Engine
 - Setup Async Meta-Search adapters for Bing/SerpAPI.

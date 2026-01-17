@@ -34,10 +34,37 @@ We have successfully completed the first major milestone of the **Outlyne** proj
 ## Performance Results (Benchmark)
 *Running on Apple M1/M4 equivalent CPU*
 
-- **Embedder Avg Latency:** **~198.9ms**  
+- **Embedder Avg Latency:** **~92.7ms** 🔥 (After optimization)
+- **Cold Boot (Local):** ~41s (Inference + Export)
+- **Cold Boot (Docker):** **~2s** (Pre-baked IR Artifacts)
 - **Output Dimensions:** 768 (L2 Normalized)
 - **Memory Footprint:** ~813MB (Quantized Model Buffer)
-- **Status:** ✅ **Target Met** (< 200ms per embedding).
+- **Status:** ✅ **Target Exceeded** (< 100ms per embedding).
+
+---
+
+## The Docker "Bakery" Strategy
+To solve the slow startup and reproducibility issues, we implemented a **Multi-Stage Build** system:
+- **Build Stage:** Installs `uv`, downloads SigLIP2, and runs a one-time OpenVINO export (IR conversion).
+- **Runtime Stage:** A slim production image containing **only** the pre-baked `.xml` and `.bin` model files.
+- **Caching:** Utilized **BuildKit Cache Mounts** (`--mount=type=cache`) to persist HuggingFace downloads across builds, ensuring subsequent 1-second build times even if code changes.
+
+### Why the initial build is slow:
+Converting an 813MB SigLIP2 model into a static OpenVINO IR graph requires:
+1. Initializing the full PyTorch weight buffers.
+2. Running a "dummy inference" to trace the execution path.
+3. JIT-optimizing the math kernels for the target CPU architecture.
+4. Serializing the optimized graph to disk.
+
+**On a typical developer laptop, this process takes 3 to 6 minutes.**
+
+### Is it worth it?
+**Absolutely.** In a production environment, cold starts are the enemy. By "baking" the model during the build phase:
+- The container boots in **~2 seconds**.
+- No network requests are made for weights at runtime.
+- The runtime environment is 100% stable and reproducible.
+
+> **💡 Dev Tip:** For rapid iteration on Python code (like `main.py` or search logic), use `bun run dev:api` locally. Only use `bun run docker:build` when you need to verify the container or finalize a release.
 
 ---
 
