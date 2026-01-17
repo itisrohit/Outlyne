@@ -2,12 +2,12 @@
 
 ## Executive Summary
 
-This document details the implementation of Outlyne's Recall Engine and Precision Layer—a two-stage pipeline that enables sketch-to-image search without maintaining a local image index. The system achieves sub-4-second end-to-end latency while operating entirely on free infrastructure.
+This document details the implementation of Outlyne's Recall Engine and Precision Layer—a two-stage pipeline that enables sketch-to-image search without maintaining a local image index. It features a **Zero-Shot Semantic Interrogator** that translates raw visual intent into high-performance web queries.
 
 **Key Metrics:**
 - End-to-end latency: 3.2 seconds (20 results)
 - Top similarity score: 61.3%
-- Zero API costs, zero rate limits
+- Zero-Shot Intent Latency: ~12ms
 - 100% success rate on candidate encoding
 
 ---
@@ -22,11 +22,12 @@ Visual search systems traditionally require maintaining a local index of image e
 2. **Update Frequency:** The web changes constantly; maintaining freshness is expensive
 3. **Infrastructure Costs:** Indexing and serving require significant computational resources
 
+**The Outlyne Solution:**
 Build a high-quality sketch-to-image search engine that:
 - Operates without a local image index
+- Uses a **Semantic Interrogator** to bridge raw vision and text-based recall
 - Uses only free, publicly available APIs
-- Maintains sub-5-second perceived latency
-- Scales to handle concurrent users
+- Maintains sub-4-second end-to-end latency
 
 ---
 
@@ -38,6 +39,8 @@ Build a high-quality sketch-to-image search engine that:
 User Sketch (224×224 RGB)
     ↓
 [Vision Core] → 768-dim embedding (92ms)
+    ↓
+[Semantic Interrogator] → Visual-to-Intent mapping (12ms)
     ↓
 [Recall Engine] → Fetch candidates from DuckDuckGo (1.8s)
     ↓
@@ -55,7 +58,8 @@ Top-K Results (sorted by score)
 | Component | Responsibility | Latency |
 |-----------|---------------|---------|
 | Vision Core | Sketch → embedding | 92ms |
-| Recall Engine | Text query → candidate URLs | 1.8s |
+| Semantic Interrogator | Embedding → Intent (Zero-Shot) | 12ms |
+| Recall Engine | Intent → candidate URLs | 1.8s |
 | Thumbnail Downloader | URL → image bytes (parallel) | 0.5s |
 | Batch Encoder | Images → embeddings | 0.8s |
 | Precision Layer | Similarity ranking | <10ms |

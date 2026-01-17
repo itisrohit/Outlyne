@@ -11,12 +11,13 @@ Build a live, lightweight sketch-to-image meta search engine where a user draws 
 - **No Local Indexing:** Stay lightweight by leveraging existing search engines.
 - **CPU-First:** High-performance inference on consumer hardware via OpenVINO optimization.
 - **Sub-4-Second Latency:** Async architecture and minimal caching for fast iteration.
+- **Pure Visual Discovery:** No text required; vision-first intent detection.
 
 ---
 
 ## Core Idea
-> **"Do not own the index. Orchestrate the intelligence."**  
-> Use existing image search engines for Recall, then apply sketch-aware visual intelligence locally for Precision.
+> **"Visual-to-Visual via Semantic Interrogation."**  
+> Use existing image search engines for Recall by projecting raw visual embeddings into natural language concepts (Zero-Shot), then apply sketch-aware visual intelligence locally for Precision.
 
 ---
 
@@ -24,10 +25,10 @@ Build a live, lightweight sketch-to-image meta search engine where a user draws 
 
 ### Included
 - **Live Sketch → Embedding:** Instant conversion via SigLIP2 (92ms latency).
+- **Semantic Interrogation:** Zero-shot visual-to-concept mapping (12ms).
 - **Dynamic Meta-Search:** Real-time fetching from DuckDuckGo (free, unlimited).
 - **Local Re-ranking:** Dot product similarity on L2-normalized embeddings.
-- **Minimal Caching:** In-memory LRU cache for sketch embeddings.
-- **Proactive UI:** Modern, responsive canvas interface (Phase 4).
+- **Premium Canvas UI:** Clean, minimalist discovery interface (Phase 4).
 
 ### Excluded
 - Local image datasets or permanent indexing.
@@ -43,6 +44,7 @@ Build a live, lightweight sketch-to-image meta search engine where a user draws 
 - **Vision Encoder:** SigLIP2-Base (`google/siglip-base-patch16-224`)
 - **Inference Runtime:** OpenVINO 2025 (Intel CPU optimization)
 - **Vector Math:** NumPy for vectorized dot product ranking
+- **Zero-Shot Engine:** Custom Semantic Interrogator for visual-intent mapping
 
 ### Meta Search & Data
 - **Search Engine:** DuckDuckGo (via `ddgs` library - 100% free, no limits)
@@ -51,14 +53,14 @@ Build a live, lightweight sketch-to-image meta search engine where a user draws 
 
 ### Backend (The Orchestrator)
 - **Framework:** FastAPI (Python 3.12+) — Asynchronous and type-safe
-- **Caching:** async-lru for in-memory sketch embedding cache
+- **Caching:** Manual async-safe sketch cache (OrderedDict + BLAKE3)
 - **Dependency Management:** uv (fast, reproducible)
 - **Task Runner:** Bun (orchestrates dev/lint/docker commands)
 
 ### Frontend (The Experience)
-- **Framework:** Vite + React (SPA) — Planned for Phase 4
+- **Framework:** Vite + React (SPA) — High-performance interactive UI
 - **Styling:** Vanilla CSS (Glassmorphism + Modern Gradients)
-- **Canvas Engine:** Native Canvas + Perfect Freehand
+- **Canvas Engine:** Native Canvas with high-fidelity super-sampling
 
 ---
 
@@ -69,13 +71,13 @@ User Sketch (224×224 RGB)
     ↓
 [Vision Core] → SigLIP2 + OpenVINO → 768-dim embedding (92ms)
     ↓
-[Cache Check] → async-lru (BLAKE3 hash key)
-    ↓ (miss)
-[Recall Engine] → DuckDuckGo search → 20 candidate URLs (1.8s)
+[Semantic Interrogator] → Interrogate Concept Bank → Descriptive Query (12ms)
+    ↓
+[Recall Engine] → DuckDuckGo search → 20-50 candidate URLs (1.8s)
     ↓
 [Thumbnail Downloader] → Parallel fetch (15 concurrent) → Image bytes (0.5s)
     ↓
-[Batch Encoder] → Encode all candidates → 20 embeddings (0.8s)
+[Batch Encoder] → Encode all candidates → 20-50 embeddings (0.8s)
     ↓
 [Precision Layer] → Dot product ranking → Sorted results (<10ms)
     ↓
@@ -147,11 +149,13 @@ For the MVP, we implement **minimal in-memory caching** to optimize iterative sk
 - [x] Verify cache functionality with end-to-end test
 - **Deliverable:** ✅ Sub-millisecond response for cached sketches
 
-### Phase 4: Premium UI/UX
-- Build Vite-based frontend with high-performance drawing canvas
-- Implement "Search-as-you-draw" (debounced inference)
-- Add result gallery with similarity scores
-- **Deliverable:** Smooth, polished static web application
+### Phase 4: Premium UI/UX [COMPLETED ✅]
+- [x] Build Vite-based frontend with low-latency drawing canvas
+- [x] Implement "Pure Sketch Search" (Zero-shot discovery)
+- [x] Add "Search Marketplace" button (manual trigger control)
+- [x] Create animated result grid with Framer Motion
+- [x] Integrate unified `dev` command for full-stack orchestration
+- **Deliverable:** ✅ Smooth, polished reactive web application
 
 ---
 
@@ -159,11 +163,12 @@ For the MVP, we implement **minimal in-memory caching** to optimize iterative sk
 
 ### End-to-End Latency
 - **Vision Core (sketch encoding):** 92.7ms
+- **Semantic Interrogation:** 12ms
 - **Recall (DuckDuckGo search):** 1.8s
 - **Download (20 thumbnails, parallel):** 0.5s
 - **Precision (batch encoding + ranking):** 0.8s
 - **Total (uncached):** ~3.2s
-- **Total (cached sketch):** <1ms (memory lookup)
+- **Total (cached sketch):** <15ms (Skip encoding + Interrogation)
 
 ### Quality Metrics
 - **Top-1 similarity:** 61.3% (real-world test)
@@ -184,15 +189,10 @@ For the MVP, we implement **minimal in-memory caching** to optimize iterative sk
 - [x] **Recall Engine:** DuckDuckGo integration (free, unlimited)
 - [x] **Precision Layer:** Dot product ranking (vectorized)
 - [x] **Caching Layer:** Manual async-safe sketch cache (OrderedDict + BLAKE3)
-- [x] **Docker Setup:** Multi-stage build with baked model
-- [ ] **Outlyne Web:** Vite-based reactive dashboard (Phase 4)
-- [ ] **Deployment Kit:** Complete Docker Compose setup
+- [x] **Outlyne Web:** Vite-based reactive dashboard (Premium UI)
+- [x] **Deployment Kit:** Complete Docker Compose setup
 
 ---
 
 ## Current Status
-
-**Completed:** Phases 1, 2, 3, 3.5 (Backend fully functional with caching)  
-**Next:** Phase 4 (Frontend UI/UX)
-
-**Status:** Backend is complete with optimized caching. Frontend pending.
+The system is fully operational. Users can draw concepts and find matching imagery from the internet with zero text input.

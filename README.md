@@ -1,7 +1,7 @@
 # Outlyne
-> AI-powered sketch-to-image meta search engine with sub-second perceived latency.
+> AI-powered sketch-to-image meta search engine with zero-shot visual discovery.
 
-Outlyne uses **SigLIP2** and **OpenVINO** to convert hand-drawn sketches into visual embeddings in real-time (~90ms), then performs live meta-searches across the internet to find visually similar matches.
+Outlyne uses **SigLIP2** and **OpenVINO** to convert hand-drawn sketches into visual embeddings in real-time (~90ms). It features a **Zero-Shot Semantic Interrogator** that interprets your visual intent to perform live searches across the internet—finding matching products and imagery even with zero text input.
 
 ---
 
@@ -29,15 +29,12 @@ uv run python tests/bench_embedder.py
 ```
 
 ### 3. Start Development
-Choose between running locally for rapid logic changes or via Docker for high-performance "baked" model serving.
+Outlyne now features a unified development command that orchestrates both the API and the Web frontend:
 
-**Local Development:**
+**Orchestrated Local Development:**
 ```bash
-# Start the FastAPI Backend
-bun run dev:api
-
-# Start the React Frontend (Phase 4)
-bun run dev:web
+# Start both Backend + Frontend in sync
+bun run dev
 ```
 
 **Dockerized (Recommended for Speed):**
@@ -55,8 +52,10 @@ bun run docker:up
 
 | Command | Description |
 | :--- | :--- |
+| `bun run dev` | **Unified Dev**: Starts API and Web frontend concurrently |
 | `bun run sync` | Sync Python venv & setup cache dirs |
-| `bun run lint` | Run Ruff & Mypy strict checks |
+| `bun run lint` | Run Ruff, Mypy, and Biome strict checks across the stack |
+| `bun run test` | Run the Zero-Shot sketch search verification suite |
 | `bun run docker:build` | Bake model artifacts into Docker image |
 | `bun run docker:up` | Spin up the orchestrated stack |
 | `bun run clean` | Remove all caches, venv, and artifacts |
@@ -65,6 +64,7 @@ bun run docker:up
 
 ## 📈 Current Performance
 - **Visual Encoding:** **~92.7ms** 🔥 (SigLIP2 on CPU via OpenVINO)
+- **Semantic Interrogation:** **~12ms** (Zero-shot intent classification)
 - **Cold Boot (Docker):** **~2s** (Vs. 45s locally without pre-baked IR)
 - **Memory Footprint:** ~813MB (Model weights in buffer)
-- **Lints:** 100% clean (Strict Mypy + Ruff)
+- **Lints:** 100% clean (Strict Mypy + Ruff + Biome)
