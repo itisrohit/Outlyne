@@ -84,6 +84,54 @@ class VisualEmbedder:
 
         return gray
 
+    def encode_text(self, text: list[str]) -> np.ndarray[Any, Any]:
+        """
+        Generates normalized text embeddings for a list of strings.
+        """
+        inputs = self.processor(
+            text=text, padding="max_length", max_length=64, return_tensors="pt"
+        )
+
+        with torch.no_grad():
+            # Create a dummy image for the multi-modal forward pass if needed
+            dummy_pixel_values = np.zeros((len(text), 3, 224, 224), dtype=np.float32)
+            ov_inputs = {
+                "pixel_values": dummy_pixel_values,
+                "input_ids": inputs.input_ids.numpy(),
+            }
+            outputs = self.model.request(ov_inputs)
+
+        # Extract text embeddings
+        if "text_embeds" in outputs:
+            embeddings = outputs["text_embeds"]
+        else:
+            # Multi-modal models in OpenVINO often have specific output mappings
+            embeddings = next(iter(outputs.values()))
+
+        # L2 Normalize
+        norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
+        return cast(np.ndarray[Any, Any], embeddings / np.maximum(norms, 1e-12))
+
+    def classify_sketch(self, sketch_embedding: np.ndarray[Any, Any]) -> str:
+        """
+        Heuristic classification of a sketch into broad categories to seed 
+        web recall when no text query is provided.
+        """
+        anchors = [
+            "chair", "shoes", "car", "watch", "lamp", "house", "mountain", 
+            "flower", "animal", "human face", "logo", "apparel", "gadget",
+            "bicycle", "tree", "food", "instrument", "furniture", "bird"
+        ]
+        
+        # In a real 2026 production app, these would be pre-computed
+        anchor_embeddings = self.encode_text(anchors)
+        
+        # Dot product for similarity
+        scores = np.dot(anchor_embeddings, sketch_embedding)
+        best_idx = np.argmax(scores)
+        
+        return anchors[best_idx]
+
     def encode_image(self, image: Image.Image) -> np.ndarray[Any, Any]:
         """
         Generates a normalized visual embedding for a PIL Image.
