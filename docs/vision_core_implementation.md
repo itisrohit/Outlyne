@@ -1,4 +1,4 @@
-# Phase 1 Summary: The Vision Core
+# The Vision Core Summary
 
 ## Accomplishments
 We have successfully completed the first major milestone of the **Outlyne** project: building a high-performance, CPU-optimized visual embedding engine.
