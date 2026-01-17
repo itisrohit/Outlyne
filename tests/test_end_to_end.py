@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+import pytest
 from PIL import Image, ImageDraw
 
 # Add src to path
@@ -34,6 +35,7 @@ def create_test_sketch() -> np.ndarray[Any, Any]:
     return np.array(img)
 
 
+@pytest.mark.asyncio
 async def test_end_to_end() -> None:
     logger.info("=== Starting End-to-End Pipeline Test ===")
 
