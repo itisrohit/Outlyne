@@ -9,7 +9,9 @@ authors = [
 requires-python = ">=3.12"
 dependencies = [
     "blake3>=1.0.8",
+    "bs4>=0.0.2",
     "cachetools>=6.2.4",
+    "ddgs>=9.10.0",
     "fastapi>=0.128.0",
     "httpx>=0.28.1",
     "nncf>=2.19.0",
