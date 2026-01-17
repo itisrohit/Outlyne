@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./assets/banner.png" alt="Outlyne Banner" width="100%" />
+  <img src="./assets/banner.png" alt="Outlyne Banner" width="95%" />
 
   <br />
 
@@ -7,7 +7,7 @@
 
   <br />
 
-  <img src="./assets/demo.gif" alt="Outlyne Demo" width="94%" />
+  <img src="./assets/demo.gif" alt="Outlyne Demo" width="97%" />
   
   <br />
   
