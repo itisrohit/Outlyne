@@ -57,10 +57,9 @@ class SearchOrchestrator:
             # Returns a descriptive tag like "modern chair minimalist furniture"
             effective_query = self.embedder.classify_sketch(query_embedding)
             logger.info("Zero-Shot Visual Intent: '%s'", effective_query)
-            
+
             search_results = await self.search_adapter.search(
-                effective_query, 
-                max_results=max_results * 5 
+                effective_query, max_results=max_results * 5
             )
         else:
             # Hybrid search for better results when context is provided

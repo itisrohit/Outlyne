@@ -30,7 +30,7 @@ class VisualEmbedder:
         model_path: str | None = None,
     ):
         self.device = device
-        
+
         # Initialize sketch cache (LRU with TTL)
         self._sketch_cache: OrderedDict[str, tuple[np.ndarray[Any, Any], float]] = OrderedDict()
         self._cache_lock = asyncio.Lock()
@@ -88,9 +88,7 @@ class VisualEmbedder:
         """
         Generates normalized text embeddings for a list of strings.
         """
-        inputs = self.processor(
-            text=text, padding="max_length", max_length=64, return_tensors="pt"
-        )
+        inputs = self.processor(text=text, padding="max_length", max_length=64, return_tensors="pt")
 
         with torch.no_grad():
             # Create a dummy image for the multi-modal forward pass if needed
@@ -114,22 +112,38 @@ class VisualEmbedder:
 
     def classify_sketch(self, sketch_embedding: np.ndarray[Any, Any]) -> str:
         """
-        Heuristic classification of a sketch into broad categories to seed 
+        Heuristic classification of a sketch into broad categories to seed
         web recall when no text query is provided.
         """
         anchors = [
-            "chair", "shoes", "car", "watch", "lamp", "house", "mountain", 
-            "flower", "animal", "human face", "logo", "apparel", "gadget",
-            "bicycle", "tree", "food", "instrument", "furniture", "bird"
+            "chair",
+            "shoes",
+            "car",
+            "watch",
+            "lamp",
+            "house",
+            "mountain",
+            "flower",
+            "animal",
+            "human face",
+            "logo",
+            "apparel",
+            "gadget",
+            "bicycle",
+            "tree",
+            "food",
+            "instrument",
+            "furniture",
+            "bird",
         ]
-        
+
         # In a real 2026 production app, these would be pre-computed
         anchor_embeddings = self.encode_text(anchors)
-        
+
         # Dot product for similarity
         scores = np.dot(anchor_embeddings, sketch_embedding)
         best_idx = np.argmax(scores)
-        
+
         return anchors[best_idx]
 
     def encode_image(self, image: Image.Image) -> np.ndarray[Any, Any]:
