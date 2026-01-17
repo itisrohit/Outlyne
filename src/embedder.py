@@ -138,7 +138,7 @@ class VisualEmbedder:
                 if current_time - timestamp < self._cache_ttl:
                     # Move to end (LRU)
                     self._sketch_cache.move_to_end(sketch_hash)
-                    logger.debug("Cache hit for sketch hash: %s", sketch_hash[:8])
+                    logger.info("Cache hit for sketch hash: %s", sketch_hash[:8])
                     return embedding
                 else:
                     # Expired
