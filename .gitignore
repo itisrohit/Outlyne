@@ -109,14 +109,11 @@ dump.rdb
 appendonly.aof
 
 # IDEs
-.vscode/
 .idea/
 *.swp
 *.swo
 .project
 .settings/
-.vscode/settings.json
-!.vscode/extensions.json
 .cursor/
 
 # Docker

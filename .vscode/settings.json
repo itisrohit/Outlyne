@@ -1,0 +1,18 @@
+{
+    "css.lint.unknownAtRules": "ignore",
+    "files.associations": {
+        "bun.lock": "jsonc",
+        "biome.json": "jsonc"
+    },
+    "json.schemas": [
+        {
+            "fileMatch": [
+                "**/bun.lock",
+                "**/biome.json"
+            ],
+            "schema": {
+                "allowTrailingCommas": true
+            }
+        }
+    ],
+}
