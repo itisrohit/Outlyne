@@ -45,8 +45,8 @@ class SearchOrchestrator:
         """
         logger.info("Starting sketch-to-image search for query: '%s'", text_query)
 
-        # Step 1: Encode the sketch
-        query_embedding = self.embedder.encode_sketch(sketch)
+        # Step 1: Encode the sketch (with caching)
+        query_embedding = await self.embedder.encode_sketch(sketch)
         logger.info("Sketch encoded to %d-dim embedding", len(query_embedding))
 
         # Step 2: Recall - Fetch candidates from DuckDuckGo
