@@ -1,6 +1,10 @@
+import asyncio
 import os
+import time
+from collections import OrderedDict
 from typing import Any, cast
 
+import blake3
 import cv2
 import numpy as np
 import torch
@@ -26,6 +30,12 @@ class VisualEmbedder:
         model_path: str | None = None,
     ):
         self.device = device
+        
+        # Initialize sketch cache (LRU with TTL)
+        self._sketch_cache: OrderedDict[str, tuple[np.ndarray[Any, Any], float]] = OrderedDict()
+        self._cache_lock = asyncio.Lock()
+        self._cache_maxsize = 100
+        self._cache_ttl = 600  # 10 minutes
 
         # Determine if we have a pre-baked model path (e.g., in Docker)
         # Or check if the local export directory already exists to skip export
@@ -104,16 +114,55 @@ class VisualEmbedder:
 
         return cast(np.ndarray[Any, Any], embedding)
 
-    def encode_sketch(self, sketch_np: np.ndarray[Any, Any]) -> np.ndarray[Any, Any]:
+    def _compute_sketch_hash(self, sketch_np: np.ndarray[Any, Any]) -> str:
         """
-        Processes a raw numpy array sketch.
+        Computes BLAKE3 hash of sketch bytes for cache key.
+        BLAKE3 is faster than SHA256 and provides sufficient uniqueness.
         """
+        sketch_bytes = sketch_np.tobytes()
+        return blake3.blake3(sketch_bytes).hexdigest()
+
+    async def encode_sketch(self, sketch_np: np.ndarray[Any, Any]) -> np.ndarray[Any, Any]:
+        """
+        Processes a raw numpy array sketch with caching.
+        Repeated sketches return instantly from cache (<1ms).
+        """
+        sketch_hash = self._compute_sketch_hash(sketch_np)
+        current_time = time.time()
+
+        async with self._cache_lock:
+            # Check cache
+            if sketch_hash in self._sketch_cache:
+                embedding, timestamp = self._sketch_cache[sketch_hash]
+                # Check TTL
+                if current_time - timestamp < self._cache_ttl:
+                    # Move to end (LRU)
+                    self._sketch_cache.move_to_end(sketch_hash)
+                    logger.debug("Cache hit for sketch hash: %s", sketch_hash[:8])
+                    return embedding
+                else:
+                    # Expired
+                    del self._sketch_cache[sketch_hash]
+
+        # Cache miss - compute embedding
         normalized = self.normalize_sketch(sketch_np)
         pil_image = Image.fromarray(normalized).convert("RGB")
-        return self.encode_image(pil_image)
+        embedding = self.encode_image(pil_image)
+
+        # Store in cache
+        async with self._cache_lock:
+            self._sketch_cache[sketch_hash] = (embedding, current_time)
+            # Evict oldest if over limit
+            if len(self._sketch_cache) > self._cache_maxsize:
+                self._sketch_cache.popitem(last=False)
+
+        return embedding
 
 
 if __name__ == "__main__":
+    import asyncio
+    import time
+
     from logger import setup_logging
 
     setup_logging()
@@ -122,10 +171,10 @@ if __name__ == "__main__":
     dummy_sketch = np.ones((224, 224, 3), dtype=np.uint8) * 255
     cv2.line(dummy_sketch, (50, 50), (150, 150), (0, 0, 0), 2)
 
-    import time
+    async def test_encoding() -> None:
+        start = time.time()
+        vec = await embedder.encode_sketch(dummy_sketch)
+        logger.info("Embedding shape: %s", vec.shape)
+        logger.info("Inference time: %.2fms", (time.time() - start) * 1000)
 
-    start = time.time()
-    vec = embedder.encode_sketch(dummy_sketch)
-
-    logger.info("Embedding shape: %s", vec.shape)
-    logger.info("Inference time: %.2fms", (time.time() - start) * 1000)
+    asyncio.run(test_encoding())
