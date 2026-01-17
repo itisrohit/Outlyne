@@ -30,12 +30,13 @@ RUN --mount=type=cache,target=/app/.cache/huggingface \
     TRANSFORMERS_VERBOSITY=error \
     HF_HUB_DISABLE_SYMLINKS_WARNING=1 \
     uv run python -c "\
-import os; \
+import asyncio; \
 from embedder import VisualEmbedder; \
-VisualEmbedder(model_path='.cache/ov_model')"
+embedder = VisualEmbedder(model_path='.cache/ov_model'); \
+asyncio.run(embedder.encode_sketch(__import__('numpy').ones((224,224,3), dtype='uint8')))"
 
 # ---------------------------------------------------------
-# STAGE 2: Runtime (Production)
+# STAGE 2: Runtime (Standard)
 # ---------------------------------------------------------
 FROM python:3.12-slim
 

@@ -6,7 +6,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - ENVIRONMENT=production
+      - ENVIRONMENT=development
     volumes:
       # Optional: mount a local cache for search results, but 
       # the model is baked into the image.
