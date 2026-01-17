@@ -29,6 +29,7 @@ RUN --mount=type=cache,target=/app/.cache/huggingface \
     PYTHONPATH=/app/src \
     TRANSFORMERS_VERBOSITY=error \
     HF_HUB_DISABLE_SYMLINKS_WARNING=1 \
+    PYTHONWARNINGS="ignore" \
     uv run python -c "\
 import asyncio; \
 from embedder import VisualEmbedder; \
