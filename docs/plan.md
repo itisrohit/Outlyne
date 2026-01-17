@@ -105,10 +105,14 @@ graph TD
 - [x] Containerize with Docker and OpenVINO "bakery" for 2s cold starts.
 - [x] **Deliverable:** VisualEmbedder module passing bench tests + Dockerized API.
 
-### Phase 2: The Recall Engine
-- Setup Async Meta-Search adapters for Bing/SerpAPI.
-- Implement parallel thumbnail fetching with timeout guards.
-- **Deliverable:** MetaSearchClient capable of fetching 50+ results in < 400ms.
+### Phase 2: The Recall Engine [IN PROGRESS]
+- [x] Research and select best free image search API (DuckDuckGo via `ddgs`)
+- [x] Implement BaseSearchAdapter abstract class for extensibility
+- [x] Build DuckDuckGoAdapter with the `ddgs` library (100% free, no limits)
+- [x] Create async thumbnail downloader with concurrency control
+- [x] Verify end-to-end search → download pipeline
+- [ ] Integrate search into FastAPI endpoint
+- **Deliverable:** MetaSearchClient capable of fetching 50+ results in < 2s (search + download).
 
 ### Phase 3: The Precision Layer
 - Build the Local Re-ranker using cosine similarity.
