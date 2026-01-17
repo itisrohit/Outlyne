@@ -1,34 +1,67 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand: oklch(0.7 0.2 250);
-  --font-sans: "Inter", system-ui, sans-serif;
+    --color-brand: #2d3436;
+    --color-accent: #8fb19e;
+    /* Sage Green */
+    --color-surface: #ffffff;
+    --color-bg: #f8f9fa;
+    --font-sans: "Outfit", "Inter", system-ui, sans-serif;
 }
 
 :root {
-  font-family: var(--font-sans);
+    font-family: var(--font-sans);
+    background-color: var(--color-bg);
+    color: var(--color-brand);
 }
 
 body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
 }
 
-/* Premium Glassmorphism Utility */
-.glass {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+/* Zen Surface */
+.zen-surface {
+    background: white;
+    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.03);
 }
 
-.glass-dark {
-  background: rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+.zen-glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
-/* Smooth Scrolling */
-html {
-  scroll-behavior: smooth;
+/* Custom Scrollbar - Minimal */
+.scrollbar-zen::-webkit-scrollbar {
+    width: 4px;
+}
+
+.scrollbar-zen::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+}
+
+.scrollbar-zen::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+/* Organic Fade */
+@keyframes organic-fade {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-organic {
+    animation: organic-fade 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }

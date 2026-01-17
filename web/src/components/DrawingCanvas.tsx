@@ -110,63 +110,65 @@ export function DrawingCanvas({ onExport, className }: DrawingCanvasProps) {
   };
 
   return (
-    <div className={cn("flex flex-col gap-4", className)}>
-      <div className="flex items-center justify-between bg-zinc-900/50 p-2 rounded-xl border border-white/5 backdrop-blur-md">
+    <div className={cn("flex flex-col gap-8", className)}>
+      <div className="flex items-center justify-between bg-black/5 px-4 py-3 rounded-2xl">
         <div className="flex gap-2">
           <button
             type="button"
             onClick={() => setTool("pencil")}
             className={cn(
-              "p-2 rounded-lg transition-all active:scale-90",
+              "p-2.5 rounded-xl transition-all duration-300",
               tool === "pencil"
-                ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/20"
-                : "hover:bg-white/5 text-zinc-400",
+                ? "bg-white text-black shadow-sm"
+                : "hover:bg-black/5 text-black/30",
             )}
             title="Pencil"
           >
-            <Pencil size={20} />
+            <Pencil size={18} />
           </button>
           <button
             type="button"
             onClick={() => setTool("eraser")}
             className={cn(
-              "p-2 rounded-lg transition-all active:scale-90",
+              "p-2.5 rounded-xl transition-all duration-300",
               tool === "eraser"
-                ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/20"
-                : "hover:bg-white/5 text-zinc-400",
+                ? "bg-white text-black shadow-sm"
+                : "hover:bg-black/5 text-black/30",
             )}
             title="Eraser"
           >
-            <Eraser size={20} />
+            <Eraser size={18} />
           </button>
         </div>
+
+        <div className="w-px h-8 bg-black/5" />
 
         <div className="flex gap-2">
           <button
             type="button"
             onClick={clearCanvas}
-            className="p-2 rounded-lg hover:bg-white/5 text-zinc-400 transition-all active:rotate-[-45deg]"
-            title="Clear Canvas"
+            className="p-2.5 rounded-xl hover:bg-black/5 text-black/30 transition-all active:scale-95"
+            title="Clear"
           >
-            <RotateCcw size={20} />
+            <RotateCcw size={18} />
           </button>
           <button
             type="button"
             onClick={exportCanvas}
-            className="p-2 rounded-lg hover:bg-white/5 text-zinc-400"
+            className="p-2.5 rounded-xl hover:bg-black/5 text-black/30"
             title="Export"
           >
-            <Download size={20} />
+            <Download size={18} />
           </button>
         </div>
       </div>
 
-      <div className="relative group aspect-square bg-white rounded-2xl overflow-hidden shadow-2xl border-4 border-zinc-900">
+      <div className="relative group aspect-square bg-[#fff] rounded-[3rem] overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,0.05)] border border-black/5">
         <canvas
           ref={canvasRef}
-          width={448} // 224 * 2 (Super-sampled)
+          width={448}
           height={448}
-          className="w-full h-full cursor-crosshair touch-none"
+          className="w-full h-full cursor-crosshair touch-none mix-blend-multiply opacity-80"
           onMouseDown={startDrawing}
           onMouseMove={draw}
           onMouseUp={stopDrawing}
@@ -175,7 +177,6 @@ export function DrawingCanvas({ onExport, className }: DrawingCanvasProps) {
           onTouchMove={draw}
           onTouchEnd={stopDrawing}
         />
-        <div className="absolute inset-0 pointer-events-none border-2 border-indigo-500/0 group-hover:border-indigo-500/20 transition-colors" />
       </div>
     </div>
   );
