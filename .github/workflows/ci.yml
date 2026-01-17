@@ -107,4 +107,4 @@ jobs:
           push: false
           tags: outlyne:ci
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to: type=gha,mode=min
