@@ -13,8 +13,10 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 
 # Install dependencies - silenced and no-progress to keep logs clean
+# We force the CPU-only index for torch/torchvision to save ~4GB of space
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-cache --no-progress --quiet
+    uv sync --frozen --no-cache --no-progress --quiet \
+    --extra-index-url https://download.pytorch.org/whl/cpu
 
 # Copy only files needed for model export
 COPY src/embedder.py src/logger.py src/__init__.py ./src/
@@ -51,12 +53,16 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
     libgl1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy baked artifacts
-COPY --from=exporter /app/.venv /app/.venv
-COPY --from=exporter /app/.cache/ov_model /app/.cache/ov_model
+# Security: Create user early
+RUN useradd -m outlyne
+
+# Copy baked artifacts and set ownership IMMEDIATELY to save space
+# This prevents creating a second heavy layer during 'chown'
+COPY --from=exporter --chown=outlyne:outlyne /app/.venv /app/.venv
+COPY --from=exporter --chown=outlyne:outlyne /app/.cache/ov_model /app/.cache/ov_model
 
 # Copy application source
-COPY src/ ./src/
+COPY --chown=outlyne:outlyne src/ ./src/
 
 # Set environment
 ENV PATH="/app/.venv/bin:$PATH"
@@ -67,8 +73,6 @@ ENV HF_HOME="/app/.cache/huggingface"
 
 EXPOSE 8000
 
-# Security
-RUN useradd -m outlyne && chown -R outlyne:outlyne /app
 USER outlyne
 
 # Start
