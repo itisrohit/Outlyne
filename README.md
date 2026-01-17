@@ -3,11 +3,11 @@
 
   <br />
 
-  **AI-powered sketch-to-image meta search engine with zero-shot visual discovery.**
+  <strong>AI-powered sketch-to-image meta search engine with zero-shot visual discovery.</strong>
 
   <br />
 
-  <img src="./assets/demo.gif" alt="Outlyne Demo" width="95%" />
+  <img src="./assets/demo.gif" alt="Outlyne Demo" width="90%" />
   
   <br />
   
