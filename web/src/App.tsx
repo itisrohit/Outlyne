@@ -1,29 +1,19 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Command, Cpu, Flame, Loader2, Palette, Search, Sparkles, Zap } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowRight, Cpu, Flame, Loader2, Palette, Search, Zap } from "lucide-react";
+import { useCallback, useState } from "react";
 import { DrawingCanvas } from "./components/DrawingCanvas";
 import { ResultGrid, type SearchResult } from "./components/ResultGrid";
 import { cn } from "./utils/cn";
 
 function App() {
-  const [query, setQuery] = useState("");
   const [sketch, setSketch] = useState<string>("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
-  // Track search state
-  const lastSearchRef = useRef<string>("");
-  const debounceTimer = useRef<Timer | null>(null);
-
-  const performSearch = useCallback(async (currentSketch: string, currentQuery: string) => {
-    // We need both to perform a meaningful internet recall
-    if (!currentSketch || !currentQuery || currentQuery.length < 2) return;
-
-    // Avoid redundant searches
-    const searchId = currentSketch.slice(-50) + currentQuery;
-    if (lastSearchRef.current === searchId) return;
-    lastSearchRef.current = searchId;
+  const performSearch = useCallback(async () => {
+    // We only need the sketch to start
+    if (!sketch) return;
 
     setIsLoading(true);
     setHasSearched(true);
@@ -33,8 +23,8 @@ function App() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          sketch_base64: currentSketch,
-          query: currentQuery,
+          sketch_base64: sketch,
+          query: "", // Pure sketch search: context is inferred by backend
           max_results: 12,
         }),
       });
@@ -48,20 +38,7 @@ function App() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
-
-  // Live Sync Logic: Trigger search when sketch or query changes
-  useEffect(() => {
-    if (debounceTimer.current) clearTimeout(debounceTimer.current);
-
-    debounceTimer.current = setTimeout(() => {
-      performSearch(sketch, query);
-    }, 600); // 600ms debounce for live draw feel
-
-    return () => {
-      if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    };
-  }, [sketch, query, performSearch]);
+  }, [sketch]);
 
   return (
     <div className="min-h-screen bg-zinc-950 font-sans text-zinc-50 overflow-x-hidden">
@@ -97,72 +74,60 @@ function App() {
         <div className="grid lg:grid-cols-[450px_1fr] gap-12 items-start">
           {/* Left Column: Input */}
           <aside className="space-y-6 sticky top-12">
-            <div className="bg-zinc-900/40 p-6 rounded-3xl border border-white/5 backdrop-blur-xl shadow-2xl">
-              <section className="space-y-4 mb-6">
+            <div className="bg-zinc-900/40 p-6 rounded-3xl border border-white/5 backdrop-blur-xl shadow-2xl space-y-6">
+              <section className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="text-xs font-bold uppercase tracking-widest text-zinc-500 flex items-center gap-2">
                     <Palette size={12} className="text-indigo-500" />
-                    Live Canvas
+                    Input Canvas
                   </div>
                   <div className="flex items-center gap-1.5">
                     {isLoading ? (
                       <span className="flex items-center gap-1.5 text-[10px] font-bold text-indigo-400 animate-pulse">
                         <Loader2 size={10} className="animate-spin" />
-                        Scanning Web
+                        Processing Vision
                       </span>
                     ) : (
-                      <span className="text-[10px] text-zinc-600 font-mono">Ready</span>
+                      <span className="text-[10px] text-zinc-600 font-mono">224px IR Mode</span>
                     )}
                   </div>
                 </div>
                 <DrawingCanvas onExport={setSketch} />
               </section>
 
-              <section className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <label
-                    htmlFor="context-query"
-                    className="text-xs font-bold uppercase tracking-widest text-zinc-500 flex items-center gap-2"
-                  >
-                    <Search size={12} className="text-indigo-500" />
-                    Visual Context
-                  </label>
-                  {!query && (
-                    <span className="text-[10px] text-orange-500/70 font-bold uppercase animate-pulse">
-                      Required
-                    </span>
-                  )}
-                </div>
-                <div className="relative group">
-                  <input
-                    id="context-query"
-                    type="text"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="e.g. industrial chair, mountain landscape"
-                    className="w-full bg-zinc-950/50 border border-white/5 rounded-xl px-4 py-3 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 focus:bg-zinc-950 transition-all text-sm group-hover:border-white/10"
-                  />
-                </div>
-              </section>
-
-              <div className="mt-6 pt-6 border-t border-white/5 space-y-3">
-                <div className="flex items-center gap-3 text-zinc-500">
-                  <div className="p-1.5 bg-zinc-800 rounded-lg">
-                    <Sparkles size={14} className="text-indigo-400" />
-                  </div>
-                  <p className="text-[11px] leading-snug">
-                    <span className="text-zinc-300 font-bold">Concept Search:</span> Hint the engine
-                    with keywords, then draw to refine results.
-                  </p>
-                </div>
-              </div>
+              <button
+                type="button"
+                onClick={performSearch}
+                disabled={isLoading || !sketch}
+                className={cn(
+                  "w-full py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 overflow-hidden relative group",
+                  sketch && !isLoading
+                    ? "bg-indigo-600 text-white shadow-xl shadow-indigo-600/20 hover:bg-indigo-500 active:scale-[0.98]"
+                    : "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-white/5",
+                )}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    <span>Analyzing...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Search Marketplace</span>
+                    <ArrowRight
+                      size={16}
+                      className="group-hover:translate-x-1 transition-transform"
+                    />
+                  </>
+                )}
+              </button>
             </div>
 
-            <div className="px-4 py-3 bg-indigo-500/5 border border-indigo-500/10 rounded-2xl flex items-center gap-3">
-              <Command size={14} className="text-indigo-400" />
-              <p className="text-[10px] text-indigo-300/60 font-medium">
-                Engine synchronizes visual intent every{" "}
-                <span className="text-indigo-300">600ms</span>
+            <div className="px-5 py-4 bg-white/[0.02] border border-white/5 rounded-2xl">
+              <p className="text-[10px] leading-relaxed text-zinc-500 font-medium">
+                <span className="text-indigo-400 font-bold uppercase mr-1">Pro Tip:</span>
+                Our Vision Core automatically detects the category from your sketch. Just draw and
+                search.
               </p>
             </div>
           </aside>
@@ -171,10 +136,10 @@ function App() {
           <section className="min-h-[600px] flex flex-col">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-xl font-bold flex items-center gap-3 uppercase tracking-tight">
-                Live Stream
+                Market Results
                 {results.length > 0 && (
                   <span className="text-[10px] bg-white/5 border border-white/10 px-2 py-0.5 rounded text-zinc-400 font-mono">
-                    {results.length} Matches
+                    {results.length} Found
                   </span>
                 )}
               </h2>
@@ -183,7 +148,7 @@ function App() {
                 <div className="flex items-center gap-2 px-3 py-1 bg-indigo-500/10 rounded-full border border-indigo-500/20">
                   <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-ping" />
                   <span className="text-[10px] font-black text-indigo-400 uppercase tracking-tighter">
-                    Real-time Ranking
+                    Ranking Candidates
                   </span>
                 </div>
               )}
@@ -205,10 +170,10 @@ function App() {
                       <Search className="w-12 h-12 text-indigo-500" />
                     </div>
                   </div>
-                  <h3 className="text-3xl font-black mb-4 tracking-tight">Awaiting Vision</h3>
+                  <h3 className="text-3xl font-black mb-4 tracking-tight">Visual Discovery</h3>
                   <p className="text-zinc-500 max-w-sm mx-auto leading-relaxed text-sm">
-                    Enter a context hint above and start drawing. <br />
-                    Outlyne will search the internet for your sketch in real-time.
+                    Draw your concept on the left and hit search. <br />
+                    AI will interpret your lines and find matching internet imagery.
                   </p>
                 </motion.div>
               </AnimatePresence>
@@ -230,7 +195,7 @@ function StatusBadge({
   color: "indigo" | "purple";
 }) {
   return (
-    <div className="flex items-center gap-1.5 grayscale opacity-70 hover:grayscale-0 hover:opacity-100 transition-all cursor-default">
+    <div className="flex items-center gap-1.5 grayscale opacity-70 hover:grayscale-0 hover:opacity-100 transition-all cursor-default text-zinc-400">
       <div
         className={cn(
           "p-1 rounded-md text-white",
@@ -239,7 +204,7 @@ function StatusBadge({
       >
         {icon}
       </div>
-      <span className="text-[10px] font-bold uppercase tracking-tight text-zinc-400">{label}</span>
+      <span className="text-[10px] font-bold uppercase tracking-tight">{label}</span>
     </div>
   );
 }
