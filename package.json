@@ -4,14 +4,14 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev:api": "PYTHONPATH=src uv run uvicorn main:app --reload",
+    "dev:api": "HF_HOME=.cache/huggingface TRANSFORMERS_VERBOSITY=error HF_HUB_DISABLE_SYMLINKS_WARNING=1 PYTHONPATH=src uv run uvicorn main:app --reload",
     "dev:web": "cd web && bun run dev",
-    "lint": "uv run ruff check . && uv run mypy .",
+    "lint": "HF_HOME=.cache/huggingface TRANSFORMERS_VERBOSITY=error uv run ruff check . && uv run mypy .",
     "format": "uv run ruff format .",
     "test": "uv run pytest",
-    "sync": "uv sync",
+    "sync": "mkdir -p .cache/huggingface && uv sync",
     "lock": "uv lock",
-    "clean": "rm -rf .venv node_modules .next out build dist .pytest_cache .ruff_cache .mypy_cache"
+    "clean": "rm -rf .venv node_modules .next out build dist .pytest_cache .ruff_cache .mypy_cache .cache"
   },
   "devDependencies": {
     "@types/bun": "latest"
