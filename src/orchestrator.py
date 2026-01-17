@@ -49,8 +49,16 @@ class SearchOrchestrator:
         query_embedding = await self.embedder.encode_sketch(sketch)
         logger.info("Sketch encoded to %d-dim embedding", len(query_embedding))
 
-        # Step 2: Recall - Fetch candidates from DuckDuckGo
-        search_results = await self.search_adapter.search(text_query, max_results=max_results * 2)
+        # Step 2: Semantic Auto-Context (Magic Search)
+        effective_query = text_query
+        if not text_query or text_query.strip() == "":
+            effective_query = self.embedder.classify_sketch(query_embedding)
+            logger.info("No manual context provided. Sketch interpreted as: '%s'", effective_query)
+
+        # Step 3: Recall - Fetch candidates from DuckDuckGo
+        search_results = await self.search_adapter.search(
+            effective_query, max_results=max_results * 2
+        )
 
         if not search_results:
             raise HTTPException(status_code=404, detail="No results found from search engine")
