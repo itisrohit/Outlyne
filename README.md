@@ -3,7 +3,7 @@
 
   <br />
 
-  > **AI-powered sketch-to-image meta search engine with zero-shot visual discovery.**
+  **AI-powered sketch-to-image meta search engine with zero-shot visual discovery.**
 
   <br />
 
