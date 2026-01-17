@@ -1,3 +1,4 @@
+import os
 from typing import Any, cast
 
 import cv2
@@ -22,22 +23,31 @@ class VisualEmbedder:
         self,
         model_id: str = "google/siglip-base-patch16-224",
         device: str = "CPU",
+        model_path: str | None = None,
     ):
         self.device = device
-        logger.info("Initializing VisualEmbedder with %s on %s...", model_id, device)
+        
+        # Determine if we have a pre-baked model path (e.g., in Docker)
+        # Or check if the local export directory already exists to skip export
+        effective_path = model_path or os.path.join(".cache", "ov_model")
+        has_local_ir = os.path.exists(os.path.join(effective_path, "openvino_model.xml"))
 
-        # Load processor - parameters are fetched from environment (HF_HOME)
-        self.processor = AutoProcessor.from_pretrained(
-            model_id, 
-            use_fast=True
-        )  # type: ignore[no-untyped-call]
-
-        # Load OpenVINO optimized model
-        self.model = OVModelForFeatureExtraction.from_pretrained(
-            model_id, 
-            export=True, 
-            device=device
-        )
+        if has_local_ir:
+            logger.info("🚀 Loading pre-baked OpenVINO model from %s", effective_path)
+            self.processor = AutoProcessor.from_pretrained(effective_path) # type: ignore[no-untyped-call]
+            self.model = OVModelForFeatureExtraction.from_pretrained(
+                effective_path, device=device, export=False
+            )
+        else:
+            logger.info("📦 Exporting visual model to IR (this happens once)...")
+            self.processor = AutoProcessor.from_pretrained(model_id, use_fast=True) # type: ignore[no-untyped-call]
+            self.model = OVModelForFeatureExtraction.from_pretrained(
+                model_id, export=True, device=device
+            )
+            # Save it so next time we skip the JIT export
+            os.makedirs(effective_path, exist_ok=True)
+            self.model.save_pretrained(effective_path)
+            self.processor.save_pretrained(effective_path)
 
     def normalize_sketch(self, sketch_image: np.ndarray[Any, Any]) -> np.ndarray[Any, Any]:
         """
