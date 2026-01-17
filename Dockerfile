@@ -34,7 +34,7 @@ RUN --mount=type=cache,target=/app/.cache/huggingface \
 import asyncio; \
 from embedder import VisualEmbedder; \
 embedder = VisualEmbedder(model_path='.cache/ov_model'); \
-asyncio.run(embedder.encode_sketch(__import__('numpy').ones((224,224,3), dtype='uint8')))"
+asyncio.run(embedder.encode_sketch(__import__('numpy').ones((224,224,3), dtype='uint8')))" 2>&1
 
 # ---------------------------------------------------------
 # STAGE 2: Runtime (Standard)
