@@ -1,0 +1,20 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+    volumes:
+      # Optional: mount a local cache for search results, but 
+      # the model is baked into the image.
+      - .cache/search_results:/app/.cache/search_results
+    restart: always
+
+  # Future: Add Redis for L2 caching here
+  # redis:
+  #   image: redis:alpine
+  #   ports:
+  #     - "6379:6379"

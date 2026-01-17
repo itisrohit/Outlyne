@@ -10,6 +10,8 @@
     "format": "uv run ruff format .",
     "test": "uv run pytest",
     "sync": "mkdir -p .cache/huggingface && uv sync",
+    "docker:build": "docker compose build",
+    "docker:up": "docker compose up -d",
     "lock": "uv lock",
     "clean": "rm -rf .venv node_modules .next out build dist .pytest_cache .ruff_cache .mypy_cache .cache"
   },
