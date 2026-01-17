@@ -4,8 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev:api": "uv run uvicorn src.outlyne:app --reload",
-    "dev:web": "echo 'Vite setup pending in ./web...'",
+    "dev:api": "PYTHONPATH=src uv run uvicorn main:app --reload",
+    "dev:web": "cd web && bun run dev",
     "lint": "uv run ruff check . && uv run mypy .",
     "format": "uv run ruff format .",
     "test": "uv run pytest",
